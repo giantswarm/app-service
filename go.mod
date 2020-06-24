@@ -11,7 +11,6 @@ require (
 	github.com/giantswarm/operatorkit v1.1.0
 	github.com/go-kit/kit v0.10.0
 	github.com/spf13/viper v1.7.0
-	google.golang.org/appengine v1.6.1
 	k8s.io/api v0.16.6
 	k8s.io/apimachinery v0.16.6
 )
