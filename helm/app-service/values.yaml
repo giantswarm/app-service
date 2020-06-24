@@ -1,0 +1,7 @@
+image:
+  name: "giantswarm/app-service"
+  tag: "[[ .Version ]]"
+
+project:
+  branch: "[[ .Branch ]]"
+  commit: "[[ .SHA ]]"
