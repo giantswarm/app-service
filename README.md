@@ -20,7 +20,7 @@
       [![GoDoc](https://godoc.org/github.com/giantswarm/app-service?status.svg)](http://godoc.org/github.com/giantswarm/app-service)
 
 -->
-[![CircleCI](https://circleci.com/gh/giantswarm/template.svg?style=shield&circle-token=cbabd7d13186f190fca813db4f0c732b026f5f6c)](https://circleci.com/gh/giantswarm/template)
+[![CircleCI](https://circleci.com/gh/giantswarm/app-service.svg?style=shield)](https://circleci.com/gh/giantswarm/app-service)
 
 # app-service
 
