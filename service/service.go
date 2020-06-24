@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/app-service/flag"
 	"github.com/giantswarm/app-service/pkg/project"
+	"github.com/giantswarm/app-service/service/mutator"
 )
 
 const (
@@ -29,11 +30,15 @@ type Config struct {
 
 // Service is a type providing implementation of microkit service interface.
 type Service struct {
+	Mutator *mutator.Service
 	Version *version.Service
 }
 
 // New creates a new configured service object.
 func New(config Config) (*Service, error) {
+	if config.Logger == nil {
+		return nil, microerror.Maskf(invalidConfigError, "config.Logger must not be empty")
+	}
 
 	if config.Flag == nil {
 		return nil, microerror.Maskf(invalidConfigError, "config.Flag must not be empty")
@@ -44,9 +49,24 @@ func New(config Config) (*Service, error) {
 
 	var err error
 
+	var mutatorService *mutator.Service
+	{
+		c := mutator.Config{
+			Logger: config.Logger,
+
+			Flag:  config.Flag,
+			Viper: config.Viper,
+		}
+
+		mutatorService, err = mutator.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var versionService *version.Service
 	{
-		versionConfig := version.Config{
+		c := version.Config{
 			Description: project.Description(),
 			GitCommit:   project.GitSHA(),
 			Name:        project.Name(),
@@ -54,13 +74,14 @@ func New(config Config) (*Service, error) {
 			Version:     project.Version(),
 		}
 
-		versionService, err = version.New(versionConfig)
+		versionService, err = version.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
 	}
 
 	newService := &Service{
+		Mutator: mutatorService,
 		Version: versionService,
 	}
 
