@@ -1,0 +1,101 @@
+apiVersion: application.giantswarm.io/v1alpha1
+kind: AppCatalog
+metadata:
+  labels:
+    app-operator.giantswarm.io/version: 1.0.0
+  name: control-plane-catalog
+spec:
+  config:
+    configMap:
+      name: control-plane-catalog-configmap
+      namespace: giantswarm
+    secret:
+      name: ""
+      namespace: ""
+  description: 'This catalog holds test Apps exclusively running on Giant Swarm control
+    planes. '
+  logoURL: /images/repo_icons/giantswarm.png
+  storage:
+    URL: https://giantswarm.github.io/control-plane-catalog/
+    type: helm
+  title: Control Plane Test Catalog
+---
+apiVersion: v1
+data:
+  values: |
+    Installation:
+      V1:
+        Registry:
+          Domain: quay.io
+kind: ConfigMap
+metadata:
+  name: control-plane-catalog-configmap
+  namespace: giantswarm
+---
+apiVersion: application.giantswarm.io/v1alpha1
+kind: App
+metadata:
+  labels:
+    app-operator.giantswarm.io/version: 0.0.0
+  name: chart-operator-unique
+  namespace: giantswarm
+spec:
+  catalog: control-plane-catalog
+  config:
+    configMap:
+      name: ""
+      namespace: ""
+    secret:
+      name: ""
+      namespace: ""
+  kubeConfig:
+    context:
+      name: ""
+    inCluster: true
+    secret:
+      name: ""
+      namespace: ""
+  name: chart-operator
+  namespace: giantswarm
+  userConfig:
+    configMap:
+      name: ""
+      namespace: ""
+    secret:
+      name: ""
+      namespace: ""
+  version: 1.0.3
+---
+apiVersion: application.giantswarm.io/v1alpha1
+kind: App
+metadata:
+  labels:
+    app-operator.giantswarm.io/version: 0.0.0
+  name: g8s-cert-manager-unique
+  namespace: giantswarm
+spec:
+  catalog: control-plane-catalog
+  config:
+    configMap:
+      name: ""
+      namespace: ""
+    secret:
+      name: ""
+      namespace: ""
+  kubeConfig:
+    context:
+      name: ""
+    inCluster: true
+    secret:
+      name: ""
+      namespace: ""
+  name: g8s-cert-manager
+  namespace: kube-system
+  userConfig:
+    configMap:
+      name: ""
+      namespace: ""
+    secret:
+      name: ""
+      namespace: ""
+  version: 1.1.3
