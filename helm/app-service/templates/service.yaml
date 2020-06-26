@@ -9,6 +9,7 @@ metadata:
     prometheus.io/scrape: "true"
 spec:
   ports:
-  - port: {{ .Values.port }}
+  - port: 443
+    targetPort: {{ .Values.port }}
   selector:
     {{- include "labels.selector" . | nindent 4 }}

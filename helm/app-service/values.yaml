@@ -7,3 +7,5 @@ port: 8000
 project:
   branch: "[[ .Branch ]]"
   commit: "[[ .SHA ]]"
+
+replicas: 2
