@@ -16,26 +16,52 @@ See [apps.yaml](hack/apps.yaml)
 
 ## Install
 
-- Create cluster and resources.
+- Create cluster.
 
 ```bash
 kind create cluster
-helm install -n app-operator-unique control-plane-catalog/app-operator --version 1.0.3 --dry-run --debug
-kubectl apply -f hack/apps.yaml
 ```
 
-- Check everything is installed.
+- Install resources.
 
 ```bash
-helm ls -A
+kubectl create namespace giantswarm
+kubectl create priorityclass giantswarm-critical
+helm install -n giantswarm app-operator-unique control-plane-catalog/app-operator
+helm install -n giantswarm chart-operator-unique control-plane-catalog/chart-operator
 ```
 
+- Install upstream cert-manager (TODO: Switch to g8s-cert-manager).
+
 ```bash
-kg get po
+$ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.yaml
 ```
 
 - Create cluster issuer.
 
 ```bash
 kubectl apply -f hack/issuer.yaml
+```
+- Build docker image.
+
+```bash
+docker build . -t quay.io/giantswarm/app-service:local-dev
+kind load docker-image quay.io/giantswarm/app-service:local-dev
+```
+
+- Install Helm chart. (TODO: Script manual changes to remove architect templating.) 
+
+```
+helm install -n giantswarm app-service-unique ./helm/app-service -f ./helm/app-service/ci/default-values.yaml
+```
+
+## Clean Up
+
+- Either `kind delete cluster` or follow these steps.
+
+```bash
+kubectl delete -f hack/issuer.yaml
+helm -n giantswarm del app-operator-unique app-service-unique chart-operator-unique
+kubectl delete priorityclass giantswarm-critical
+kubectl delete namespace giantswarm
 ```
