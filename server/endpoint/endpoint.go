@@ -6,19 +6,22 @@ import (
 	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger"
 
+	"github.com/giantswarm/app-service/server/endpoint/webhook"
+	"github.com/giantswarm/app-service/server/middleware"
 	"github.com/giantswarm/app-service/service"
 )
 
 // Config represents the configuration used to create a endpoint.
 type Config struct {
-	// Dependencies.
-	Logger  micrologger.Logger
-	Service *service.Service
+	Logger     micrologger.Logger
+	Middleware *middleware.Middleware
+	Service    *service.Service
 }
 
 type Endpoint struct {
 	Healthz *healthz.Endpoint
 	Version *version.Endpoint
+	Webhook *webhook.Endpoint
 }
 
 func New(config Config) (*Endpoint, error) {
@@ -36,14 +39,28 @@ func New(config Config) (*Endpoint, error) {
 		}
 	}
 
+	var webhookEndpoint *webhook.Endpoint
+	{
+		c := webhook.Config{
+			Logger:     config.Logger,
+			Middleware: config.Middleware,
+			Service:    config.Service.Mutator,
+		}
+
+		webhookEndpoint, err = webhook.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var versionEndpoint *version.Endpoint
 	{
-		versionConfig := version.Config{
+		c := version.Config{
 			Logger:  config.Logger,
 			Service: config.Service.Version,
 		}
 
-		versionEndpoint, err = version.New(versionConfig)
+		versionEndpoint, err = version.New(c)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}
@@ -52,6 +69,7 @@ func New(config Config) (*Endpoint, error) {
 	e := &Endpoint{
 		Healthz: healthzEndpoint,
 		Version: versionEndpoint,
+		Webhook: webhookEndpoint,
 	}
 
 	return e, nil

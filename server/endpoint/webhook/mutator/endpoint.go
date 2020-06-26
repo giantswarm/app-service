@@ -15,7 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 
-	"github.com/giantswarm/app-service/service"
+	"github.com/giantswarm/app-service/server/middleware"
+	"github.com/giantswarm/app-service/service/mutator"
 )
 
 const (
@@ -24,14 +25,15 @@ const (
 	// Name identifies the endpoint. It is aligned to the package path.
 	Name = "webhook/mutator"
 	// Path is the HTTP request path this endpoint is registered for.
-	Path = "/webhooks/mutator"
+	Path = "/webhooks/mutator/"
 )
 
 // Config represents the configuration used to create a version endpoint.
 type Config struct {
 	// Dependencies.
-	Logger  micrologger.Logger
-	Service *service.Service
+	Logger     micrologger.Logger
+	Middleware *middleware.Middleware
+	Service    *mutator.Service
 }
 
 // New creates a new configured version endpoint.
@@ -62,7 +64,7 @@ type Endpoint struct {
 	// Dependencies.
 	deserializer runtime.Decoder
 	logger       micrologger.Logger
-	service      *service.Service
+	service      *mutator.Service
 }
 
 // Decoder returns a function to decode requests.
@@ -103,7 +105,7 @@ func (e *Endpoint) Endpoint() kitendpoint.Endpoint {
 			return nil, microerror.Mask(err)
 		}
 
-		patches, err := e.service.Mutator.Mutate(ctx, newAppCR, oldAppCR)
+		patches, err := e.service.Mutate(ctx, newAppCR, oldAppCR)
 		if err != nil {
 			return nil, microerror.Mask(err)
 		}

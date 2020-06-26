@@ -14,6 +14,7 @@ import (
 
 	"github.com/giantswarm/app-service/pkg/project"
 	"github.com/giantswarm/app-service/server/endpoint"
+	"github.com/giantswarm/app-service/server/middleware"
 	"github.com/giantswarm/app-service/service"
 )
 
@@ -39,11 +40,25 @@ func New(config Config) (microserver.Server, error) {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Viper must not be empty", config)
 	}
 
+	var middlewareCollection *middleware.Middleware
+	{
+		c := middleware.Config{
+			Logger:  config.Logger,
+			Service: config.Service,
+		}
+
+		middlewareCollection, err = middleware.New(c)
+		if err != nil {
+			return nil, microerror.Mask(err)
+		}
+	}
+
 	var endpointCollection *endpoint.Endpoint
 	{
 		c := endpoint.Config{
-			Logger:  config.Logger,
-			Service: config.Service,
+			Logger:     config.Logger,
+			Middleware: middlewareCollection,
+			Service:    config.Service,
 		}
 
 		endpointCollection, err = endpoint.New(c)
