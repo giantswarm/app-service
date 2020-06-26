@@ -19,7 +19,7 @@ See [apps.yaml](hack/apps.yaml)
 - Create cluster.
 
 ```bash
-kind create cluster
+kind create cluster --config hack/kind-config.yaml
 ```
 
 - Install resources.
@@ -34,10 +34,10 @@ helm install -n giantswarm chart-operator-unique control-plane-catalog/chart-ope
 - Install upstream cert-manager (TODO: Switch to g8s-cert-manager).
 
 ```bash
-$ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.yaml
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.1/cert-manager.yaml
 ```
 
-- Create cluster issuer.
+- Create cluster issuer once cert-manager webhook is running.
 
 ```bash
 kubectl apply -f hack/issuer.yaml
@@ -52,8 +52,14 @@ kind load docker-image quay.io/giantswarm/app-service:local-dev
 
 - Install Helm chart. (TODO: Script manual changes to remove architect templating.) 
 
-```
+```bash
 helm install -n giantswarm app-service-unique ./helm/app-service -f ./helm/app-service/ci/default-values.yaml
+```
+
+- Check logs and create some app CRs! 
+
+```bash
+kubectl -n giantswarm logs -f deploy/app-service-unique | luigi
 ```
 
 ## Clean Up
