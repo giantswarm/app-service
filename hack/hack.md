@@ -45,6 +45,7 @@ kubectl apply -f hack/issuer.yaml
 - Build docker image.
 
 ```bash
+CGO_ENABLED=0 GOOS=linux go build .
 docker build . -t quay.io/giantswarm/app-service:local-dev
 kind load docker-image quay.io/giantswarm/app-service:local-dev
 ```
